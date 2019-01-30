@@ -17,8 +17,14 @@
 'use strict'
 
 const express = require('express')
+const got = require('got')
+const logger = require('../logger')
+const { decodeBase64 } = require('../utils')
+const kubernetes = require('../kubernetes')
 const { isAuthenticated } = require('../middleware')
-const { domains } = require('../services')
+const { version } = require('../../package')
+
+const apiRegistration = kubernetes.apiRegistration()
 
 const router = module.exports = express.Router()
 
@@ -27,8 +33,29 @@ router.route('/')
   .get(async (req, res, next) => {
     try {
       const user = req.user
-      res.send(await domains.list({ user }))
+      const gardenerVersion = await fetchGardenerVersion()
+      res.send({ version, gardenerVersion, user })
     } catch (err) {
       next(err)
     }
   })
+
+async function fetchGardenerVersion () {
+  try {
+    const { spec: { service, caBundle } } = await apiRegistration.apiservices.get({
+      name: 'v1beta1.garden.sapcloud.io'
+    })
+    const uri = `https://${service.name}.${service.namespace}/version`
+    const { body: version } = await got(uri, {
+      ca: decodeBase64(caBundle),
+      json: true
+    })
+    return version
+  } catch (err) {
+    logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
+    if (err.code === 'ENOTFOUND' || err.code === 404) {
+      return undefined
+    }
+    throw err
+  }
+}
