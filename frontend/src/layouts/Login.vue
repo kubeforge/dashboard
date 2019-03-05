@@ -36,7 +36,7 @@ limitations under the License.
           Login <v-icon dark class="ml-2">mdi-login-variant</v-icon>
         </div>
         <div xs5 offset-xs2 right class="loginLink">
-          <a @click.stop="dialog = true">Login with an existing Token</a>
+          <a @click.stop="dialog = true">Directly enter a Bearer Token</a>
         </div>
       </v-flex>
     </v-layout>
@@ -53,7 +53,7 @@ limitations under the License.
         <span class="headline white--text">Login</span>
       </v-card-title>
       <v-card-text>
-        <v-text-field v-model="id_token" color="teal darken-2" label="Token" hint="Directly enter a Bearer token trusted by the Kubernetes ApiServer" persistent-hint required></v-text-field>
+        <v-textarea v-model="id_token" color="grey" box label="Token" hint="Directly enter a Bearer Token trusted by the Kubernetes ApiServer" persistent-hint required></v-textarea>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -66,18 +66,11 @@ limitations under the License.
 </template>
 
 <script>
-import {
-  mapState
-} from 'vuex'
-import {
-  getUserInfo
-} from '@/utils/api'
-import {
-  SnotifyPosition
-} from 'vue-snotify'
+import { mapState, mapActions } from 'vuex'
+import { SnotifyPosition } from 'vue-snotify'
 
 export default {
-  data() {
+  data () {
     return {
       dialog: false,
       id_token: ''
@@ -86,40 +79,51 @@ export default {
   computed: {
     ...mapState([
       'color',
-      'cfg'
+      'cfg',
+      'user'
     ]),
-    landingPageUrl() {
+    landingPageUrl () {
       return this.cfg.landingPageUrl
     },
-    footerLogoUrl() {
+    footerLogoUrl () {
       return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
     }
   },
+  mounted () {
+    if (this.user) {
+      this.unsetUser()
+    }
+  },
+  beforeRouteEnter (to, from, next) {
+    let err
+    if (/^#.+/.test(to.hash)) {
+      const searchParams = new URLSearchParams(to.hash.substring(1))
+      if (searchParams.has('error')) {
+        err = new Error(searchParams.get('error'))
+      }
+    }
+    next(vm => {
+      if (err) {
+        vm.showSnotifyLoginError(err.message)
+        vm.$router.replace('/login')
+      }
+    })
+  },
   methods: {
-    async handleLogin() {
+    ...mapActions([
+      'unsetUser'
+    ]),
+    handleLogin () {
       try {
         this.$userManager.signin()
       } catch (err) {
         this.showSnotifyLoginError(err.message)
       }
     },
-    async handleTokenLogin() {
+    async handleTokenLogin () {
       try {
-        const user = {
-          id_token: this.id_token
-        }
-        const {
-          data: userInfo
-        } = await getUserInfo({
-          user
-        })
-        user.profile = {
-          name: userInfo.username,
-          groups: userInfo.groups,
-          email: undefined
-        }
-        this.$userManager.setUser(user)
-        await this.$store.dispatch('setUser', user)
+        const user = await this.$userManager.signin(this.id_token)
+        console.log(user)
         this.$router.push({
           name: 'Home'
         })
@@ -127,7 +131,7 @@ export default {
         this.showSnotifyLoginError(err.message)
       }
     },
-    showSnotifyLoginError(message) {
+    showSnotifyLoginError (message) {
       const config = {
         position: SnotifyPosition.rightBottom,
         timeout: 5000,
@@ -249,11 +253,11 @@ export default {
           width: 30%;
 
           a {
-            color: #ffb74d;
+            color: #cfcfcf;
           }
 
           a:hover {
-            color: #2c353d;
+            color: #ffb74d;
           }
         }
 

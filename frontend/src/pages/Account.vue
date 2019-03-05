@@ -16,42 +16,51 @@ limitations under the License.
 
 <template>
   <v-container fluid>
-
     <v-card class="mt-2">
       <v-toolbar card class="teal darken-1" dark>
-        <v-icon class="white--text pr-2">mdi-account</v-icon>
+        <v-icon class="white--text pr-2">{{icon}}</v-icon>
         <v-toolbar-title>User Details</v-toolbar-title>
         <v-spacer></v-spacer>
         <copy-btn :clipboard-text="idToken" copy-success-text="Copied ID Token to clipboard!"></copy-btn>
       </v-toolbar>
       <v-card-text>
-       <v-layout row wrap>
-         <v-flex md4 xs12>
-           <label class="caption grey--text text--darken-2">Name</label>
-           <p class="subheading">{{username}}</p>
-         </v-flex>
-         <v-flex md8 xs12>
-           <label class="caption grey--text text--darken-2">Email Address</label>
-           <p class="subheading">{{email}}</p>
-         </v-flex>
-         <v-flex md6 xs12>
-           <label class="caption grey--text text--darken-2">Session Expiration</label>
-           <p class="subheading">{{expiresAt}}</p>
-         </v-flex>
-      </v-layout>
-     </v-card-text>
-   </v-card>
+        <v-layout row wrap>
+          <v-flex md6 xs12>
+            <label class="caption grey--text text--darken-2">Name</label>
+            <p class="pt-2">
+              <account-avatar :account-name="username" mailTo size="32"/>
+            </p>
+          </v-flex>
+          <v-flex v-if="!!name" md6 xs12>
+            <label class="caption grey--text text--darken-2">Display Name</label>
+            <p class="subheading">{{name}}</p>
+          </v-flex>
+          <v-flex md6 xs12>
+            <label class="caption grey--text text--darken-2">Groups</label>
+            <p>
+              <v-chip v-for="(group, index) in groups" :key="index" outline text-color="grey darken-2">{{group}}</v-chip>
+            </p>
+          </v-flex>
+          <v-flex md6 xs12>
+            <label class="caption grey--text text--darken-2">Session Expiration</label>
+            <p class="subheading">{{expiresAt}}</p>
+          </v-flex>
+        </v-layout>
+      </v-card-text>
+    </v-card>
   </v-container>
 </template>
 
 <script>
 import CopyBtn from '@/components/CopyBtn'
+import AccountAvatar from '@/components/AccountAvatar'
 import { mapState, mapGetters } from 'vuex'
 import moment from 'moment-timezone'
 
 export default {
   components: {
-    CopyBtn
+    CopyBtn,
+    AccountAvatar
   },
   name: 'profile',
   data () {
@@ -65,22 +74,28 @@ export default {
       'user'
     ]),
     ...mapGetters([
-      'username'
+      'username',
+      'fullDisplayName',
+      'isAdmin',
+      'canCreateProject'
     ]),
-    avatar () {
-      return this.user.profile.picture
+    icon () {
+      return this.isAdmin ? 'supervisor_account' : 'mdi-account'
     },
-    email () {
-      return this.user.profile.email
+    id () {
+      return this.user.id
+    },
+    name () {
+      return this.fullDisplayName
+    },
+    groups () {
+      return this.user.groups
     },
     idToken () {
-      return this.user.id_token || ''
-    },
-    expiresIn () {
-      return moment.duration(this.user.expires_in, 'seconds').humanize()
+      return ''
     },
     expiresAt () {
-      return moment(this.user.expires_at * 1000).format('MMMM Do YYYY, H:mm:ss')
+      return moment.duration(this.user.exp - Math.floor(Date.now() / 1000), 'seconds').humanize(true)
     }
   }
 }

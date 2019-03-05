@@ -31,6 +31,7 @@ if (version === false) {
       import('./router'),
       import('axios'),
       import('vue-snotify'),
+      import('vue-cookie'),
       import('./utils/auth')
     ])
     .then(([
@@ -42,14 +43,14 @@ if (version === false) {
       { default: router },
       { default: axios },
       { default: Snotify },
+      { default: VueCookie },
       { UserManager }
     ]) => axios
       .get('/config.json')
       .then(({ data }) => store.dispatch('setConfiguration', data))
       .then(cfg => {
         const userManager = new UserManager({
-          storage: window.localStorage,
-          origin: cfg.apiServerUrl
+          origin: window.location.origin
         })
         const bus = new Vue({})
         Storage.prototype.setObject = function (key, value) {
@@ -74,6 +75,7 @@ if (version === false) {
           Vuetify,
           Vuelidate,
           Snotify,
+          VueCookie,
           App,
           store,
           router: router({ store, userManager })
@@ -89,13 +91,14 @@ if (version === false) {
   renderNotSupportedBrowser(version)
 }
 
-function start ({ Vue, Vuetify, Vuelidate, Snotify, App, store, router }) {
+function start ({ Vue, Vuetify, Vuelidate, Snotify, VueCookie, App, store, router }) {
   /* eslint-disable no-new */
   Vue.use(Vuetify, {
     iconfont: 'md'
   })
   Vue.use(Vuelidate)
   Vue.use(Snotify)
+  Vue.use(VueCookie)
 
   Vue.config.productionTip = false
 
