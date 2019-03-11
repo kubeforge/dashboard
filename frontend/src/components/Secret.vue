@@ -20,6 +20,7 @@ limitations under the License.
     <!-- Header -->
     <v-toolbar :class="toolbarClass" dark>
       <img v-if="icon === 'alicloud'" src="@/assets/alicloud-white.svg" width="32">
+      <img v-else-if="icon === 'kubevirt'" src="@/assets/kubevirt.svg" width="32">
       <v-icon v-else class="white--text pr-2">{{icon}}</v-icon>
       <v-toolbar-title>{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>

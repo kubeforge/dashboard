@@ -94,6 +94,24 @@ limitations under the License.
     @delete="onDelete"
     ></secret>
 
+    <secret
+    v-if="hasCloudProfileForCloudProviderKind('kubevirt')"
+    class="mt-3"
+    infrastructureKey="kubevirt"
+    infrastructureName="Kubevirt"
+    icon="kubevirt"
+    description="Make sure that the new credentials have the correct Kubevirt permissions"
+    color="blue darken-2"
+    @add="onAdd"
+    @toogleHelp="onToogleHelp"
+    @update="onUpdate"
+    @delete="onDelete"
+    >
+      <template v-if="isOwnSecretBinding(props.secret)" slot="rowSubTitle" slot-scope="props">
+        {{props.secret.data.namespace}} // TODO: mention api server address
+      </template>
+    </secret>
+
     <template v-if="showDisabledCloudProviders">
 
       <disabled-secret
@@ -145,6 +163,9 @@ limitations under the License.
     <alicloud-dialog v-model="dialogState.alicloud.visible" :secret="selectedSecret"></alicloud-dialog>
     <alicloud-help-dialog v-model="dialogState.alicloud.help"></alicloud-help-dialog>
 
+    <kubevirt-dialog v-model="dialogState.kubevirt.visible" :secret="selectedSecret"></kubevirt-dialog>
+    <kubevirt-help-dialog v-model="dialogState.kubevirt.help"></kubevirt-help-dialog>
+
     <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret" :backgroundSrc="backgroundForSelectedSecret"></delete-dialog>
 
     <v-fab-transition>
@@ -168,6 +189,9 @@ limitations under the License.
         <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small class="orange darken-2" @click="onAdd('aws')">
           <v-icon>mdi-amazon</v-icon>
         </v-btn>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('kubevirt')" fab dark small class="blue darken-2" @click="onAdd('kubevirt')">
+          <img src="@/assets/kubevirt.svg" width="20">
+        </v-btn>
       </v-speed-dial>
     </v-fab-transition>
   </v-container>
@@ -187,6 +211,8 @@ import OpenstackDialog from '@/dialogs/SecretDialogOpenstack'
 import OpenstackHelpDialog from '@/dialogs/SecretDialogOpenstackHelp'
 import AlicloudDialog from '@/dialogs/SecretDialogAlicloud'
 import AlicloudHelpDialog from '@/dialogs/SecretDialogAlicloudHelp'
+import KubevirtDialog from '@/dialogs/SecretDialogKubevirt'
+import KubevirtHelpDialog from '@/dialogs/SecretDialogKubevirtHelp'
 import DeleteDialog from '@/dialogs/SecretDialogDelete'
 import Secret from '@/components/Secret'
 import DisabledSecret from '@/components/DisabledSecret'
@@ -206,6 +232,8 @@ export default {
     OpenstackHelpDialog,
     AlicloudDialog,
     AlicloudHelpDialog,
+    KubevirtDialog,
+    KubevirtHelpDialog,
     DeleteDialog,
     Secret,
     DisabledSecret
@@ -231,6 +259,10 @@ export default {
           help: false
         },
         alicloud: {
+          visible: false,
+          help: false
+        },
+        kubevirt: {
           visible: false,
           help: false
         },
@@ -292,6 +324,8 @@ export default {
           return '/static/background_openstack.svg'
         case 'alicloud':
           return '/static/background_alicloud.svg'
+        case 'kubevirt':
+          return '/static/background_kubevirt.svg'
       }
       return '/static/background_aws.svg'
     },

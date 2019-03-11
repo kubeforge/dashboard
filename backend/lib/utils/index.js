@@ -40,7 +40,7 @@ function encodeBase64 (value) {
 
 const config = {
   getCloudProviderKindList () {
-    return ['aws', 'azure', 'gcp', 'openstack', 'alicloud']
+    return ['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'kubevirt']
   }
 }
 

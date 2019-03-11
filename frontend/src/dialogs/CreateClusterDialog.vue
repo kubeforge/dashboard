@@ -63,6 +63,7 @@ limitations under the License.
                       <template slot="item" slot-scope="data">
                         <v-list-tile-action>
                           <img v-if="data.item === 'alicloud'" src="@/assets/alicloud.svg" width="24">
+                          <img v-else-if="data.item === 'kubevirt'" src="@/assets/kubevirt.svg" width="24">
                           <infra-icon v-else v-model="data.item"></infra-icon>
                         </v-list-tile-action>
                         <v-list-tile-content>
@@ -71,6 +72,7 @@ limitations under the License.
                       </template>
                       <template slot="selection" slot-scope="data">
                         <img v-if="data.item === 'alicloud'" src="@/assets/alicloud.svg" width="24" class="mr-2">
+                        <img v-if="data.item === 'kubevirt'" src="@/assets/kubevirt.svg" width="24" class="mr-2">
                         <v-avatar v-else size="30px">
                           <infra-icon v-model="data.item"></infra-icon>
                         </v-avatar>
@@ -285,6 +287,21 @@ limitations under the License.
                         <v-icon>mdi-close</v-icon>
                       </v-btn>
                     </worker-input-generic>
+
+                    <worker-input-openstack :worker.sync="worker" ref="workerInput"
+                      :workers.sync="workers"
+                      :cloudProfileName="cloudProfileName"
+                      v-if="infrastructureKind === 'kubevirt'">
+                      <v-btn v-show="index>0 || workers.length>1"
+                        small
+                        slot="action"
+                        outline
+                        icon
+                        class="grey--text lighten-2"
+                        @click.native.stop="workers.splice(index, 1)">
+                        <v-icon>mdi-close</v-icon>
+                      </v-btn>
+                    </worker-input-openstack>
 
                   </v-flex>
                 </v-layout>
@@ -738,7 +755,7 @@ export default {
       return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
     },
     sortedCloudProviderKindList () {
-      return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud'], this.cloudProviderKindList)
+      return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'kubevirt'], this.cloudProviderKindList)
     },
     projectName () {
       const predicate = item => item.metadata.namespace === this.namespace
@@ -875,6 +892,28 @@ export default {
                   nodes: '10.250.0.0/16',
                   workers: [
                     '10.250.0.0/19'
+                  ]
+                },
+                workers: null,
+                zones: null
+              }
+            }
+          }
+        case 'kubevirt':
+          return {
+            setDefaultZone: this.setDefaultZone,
+            setDefaults: () => {
+              this.infrastructureData = {
+                machineImage: {
+                  name: 'coreos',
+                  image: 'dgonzalez/coreos-cloud-container-disk:1967.4.0'
+                },
+                networks: {
+                  nodes: '10.244.0.0/16',
+                  pods: '192.168.0.0/16',
+                  services: '10.80.0.0/12',
+                  workers: [
+                    '10.244.0.0/16'
                   ]
                 },
                 workers: null,

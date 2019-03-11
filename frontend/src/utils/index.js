@@ -219,7 +219,7 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
 }
 
 export function getCloudProviderKind (object) {
-  const cloudProviderKinds = ['aws', 'azure', 'gcp', 'openstack', 'alicloud']
+  const cloudProviderKinds = ['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'kubevirt']
   return head(intersection(keys(object), cloudProviderKinds))
 }
 

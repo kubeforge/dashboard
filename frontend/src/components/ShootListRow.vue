@@ -33,6 +33,7 @@ limitations under the License.
       <v-tooltip top>
         <div slot="activator">
           <img v-if="row.kind === 'alicloud'" src="@/assets/alicloud.svg" width="20" class="mr-2">
+          <img v-else-if="row.kind === 'kubevirt'" src="@/assets/kubevirt.svg" width="20" class="mr-2">
           <infra-icon v-else v-model="row.kind"></infra-icon>
           {{ row.region }}
         </div>
