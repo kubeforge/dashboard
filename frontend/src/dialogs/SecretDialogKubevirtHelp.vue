@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <secret-dialog-help
     title="About Kubevirt Cloud Secrets"
-    color="black"
+    color="blue darken-2"
     backgroundSrc="/static/background_kubevirt.svg"
     :value="value"
     @input="onInput">
