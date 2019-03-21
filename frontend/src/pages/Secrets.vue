@@ -190,7 +190,7 @@ limitations under the License.
           <v-icon>mdi-amazon</v-icon>
         </v-btn>
         <v-btn v-if="hasCloudProfileForCloudProviderKind('kubevirt')" fab dark small class="blue darken-2" @click="onAdd('kubevirt')">
-          <img src="@/assets/kubevirt.svg" width="20">
+          <img src="@/assets/kubevirt-white.svg" width="20">
         </v-btn>
       </v-speed-dial>
     </v-fab-transition>

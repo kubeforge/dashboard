@@ -21,7 +21,7 @@ limitations under the License.
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="kubevirt"
-    color="grey darken-4"
+    color="blue darken-2"
     infraIcon="kubevirt"
     backgroundSrc="/static/background_kubevirt.svg"
     createTitle="Add new Kubevirt Cloud Secret"
@@ -32,7 +32,7 @@ limitations under the License.
       <v-layout row>
         <v-flex xs8>
           <v-text-field
-            color="grey darken-4"
+            color="blue darken-2"
             ref="namespace"
             v-model="namespace"
             :label="namespaceLabel"
@@ -49,7 +49,7 @@ limitations under the License.
         <v-flex xs8>
           <v-textarea
             ref="kubeconfig"
-            color="grey darken-4"
+            color="blue darken-2"
             box
             v-model="kubeconfig"
             :label="kubeconfigLabel"
